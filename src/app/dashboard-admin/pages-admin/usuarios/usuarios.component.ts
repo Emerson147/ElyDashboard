@@ -23,7 +23,7 @@ interface User {
   id?: number;
   name: string;
   email: string;
-  contactNumber: string;
+  contactNumber?: string;
   password?: string;
   role: 'ADMIN' | 'USER';
   status: boolean;
@@ -64,17 +64,18 @@ export class UsuariosComponent implements OnInit {
     { field: 'name', header: 'Usuario' },
     { field: 'email', header: 'Email' },
     { field: 'contactNumber', header: 'Numero de contacto' },
+    { field: 'status', header: 'Estado' },
     { field: 'role', header: 'Rol' }
   ];
 
   roles = [
-    { label: 'Administrador', value: 'ADMIN' },
-    { label: 'Usuario', value: 'USER' }
+    { label: 'Administrador', value: 'admin' },
+    { label: 'Usuario', value: 'user' }
   ];
 
   statusOptions = [
-    { label: 'Activo', value: true },
-    { label: 'Inactivo', value: false }
+    { label: 'Activo', value: 'true' },
+    { label: 'Inactivo', value: 'false' }
   ];
 
   constructor(
@@ -100,6 +101,7 @@ export class UsuariosComponent implements OnInit {
   loadUsers(): void {
     this.userService.getAllUsers().subscribe({
       next: (data: User[]) => {
+        console.log("🚀 ~ UsuariosComponent ~ this.userService.getAllUsers ~ data:", data)
         this.users = data;
       },
       error: (error) => {

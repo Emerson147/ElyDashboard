@@ -57,3 +57,18 @@
         <p-button size="small" label="Ver Almacén" icon="pi pi-eye" [routerLink]="['/pages/almacen']" class="p-button-sm p-button-text"></p-button>
     </div>
   </div>
+
+  <div class="col-span-12 lg:col-span-6 xl:col-span-4">
+    <div class="card mb-0">
+        <div class="flex justify-between mb-4">
+            <div>
+                <span class="block text-muted-color font-medium mb-4">Usuario</span>
+                <div class="text-surface-900 dark:text-surface-0 font-medium text-xl">{{data?.users}}</div>
+            </div>
+            <div class="flex items-center justify-center bg-green-100 dark:bg-green-400/10 rounded-border" style="width: 2.5rem; height: 2.5rem">
+                <i class="pi pi-user text-green-500 !text-xl"></i>
+            </div>
+        </div>
+        <p-button size="small" label="Ver Usuario" icon="pi pi-eye" [routerLink]="['/pages/usuarios']" class="p-button-sm p-button-text"></p-button>
+    </div>
+  </div>
