@@ -1,0 +1,62 @@
+<div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
+  <div class="flex flex-col items-center justify-center relative">
+    <!-- Spinner overlay -->
+    <div *ngIf="loading" class="absolute z-50 items-center justify-center bg-slate-200 w-full h-full">
+      <p-progressSpinner styleClass="custom-spinner"></p-progressSpinner>\
+    </div>
+
+    <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+      <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
+        <div class="text-center mb-8">
+          <h1 class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Crear una cuenta</h1>
+          <span class="text-muted-color font-medium">Registrate para empezar</span>
+        </div>
+        
+        <p-toast></p-toast>
+        <form (ngSubmit)="onRegister(registerForm)" #registerForm="ngForm" class="mt-10">
+          <!-- Full Name -->
+          <p-floatLabel class="mb-8">
+            <label for="fullName">Introduce tu nombre completo</label>
+            <input pInputText id="fullName" type="text"
+                   class="w-full md:w-[30rem]" [(ngModel)]="name" name="fullName" required>
+          </p-floatLabel>
+          <!-- Contact Number -->
+          <p-floatLabel class="mb-8">
+            <label for="contact">Introduce tu número de contacto</label>
+            <input pInputText id="contact" type="text"
+                   class="w-full md:w-[30rem]" [(ngModel)]="contactNumber" name="contact" required>
+          </p-floatLabel>
+          <!-- Email -->
+          <p-floatLabel class="mb-8">
+            <label for="email">Introduce tu correo electronico</label>
+            <input pInputText id="email" type="email" 
+                   class="w-full md:w-[30rem]" [(ngModel)]="email" name="email" required email>
+          </p-floatLabel>
+          <!-- Password -->
+          <p-floatLabel class="mb-8">
+            <p-password id="password" 
+            [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="false"
+            [(ngModel)]="password" name="password" required></p-password>
+            <label for="password" >Introduce su contraseña</label>
+          </p-floatLabel>
+
+          <!-- Confirm Password -->
+          <p-floatLabel class="mb-8">
+            <p-password id="confirmPassword"
+            [toggleMask]="true" styleClass="mb-8" [fluid]="true" [feedback]="false"
+            [(ngModel)]="confirmPassword" name="confirmPassword" required></p-password>
+            <label for="confirmPassword">Confirma su contraseña</label>
+          </p-floatLabel>
+
+          <!-- Submit Button -->
+          <p-button type="submit" label="Registrate" styleClass="w-full"></p-button>
+        </form>
+        <div class="mt-4 text-center">
+          <span class="text-muted-color">
+            ¿Ya tienes una cuenta?</span>
+          <a routerLink="/login" class="text-primary font-medium ml-1">Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,164 @@
+<p-toolbar styleClass="mb-6">
+  <ng-template pTemplate="start">
+      <p-button label="Nuevo Producto" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+      <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+  </ng-template>
+
+  <ng-template pTemplate="end">
+      <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  [value]="filteredProducts"
+  [rows]="10"
+  [columns]="cols"
+  [paginator]="true"
+  [globalFilterFields]="['codigo', 'name', 'serie', 'categoryName', 'warehouseId', 'inventoryStatus', 'description']"
+  [tableStyle]="{ 'min-width': '50rem' }"
+  [(selection)]="selectedProducts"
+  [rowHover]="true"
+  dataKey="id"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+  [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]"
+>
+  <ng-template pTemplate="caption">
+      <div class="flex items-center justify-between">
+          <h5 class="m-0">Gestión de Productos</h5>
+          <p-iconfield>
+              <p-inputicon styleClass="pi pi-search" />
+              <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+          </p-iconfield>
+      </div>
+  </ng-template>
+
+  <ng-template pTemplate="header">
+      <tr>
+          <th style="width: 3rem">
+              <p-tableHeaderCheckbox />
+          </th>
+          <th style="min-width: 7rem">Código</th>
+          <th pSortableColumn="name" style="min-width:8rem">
+              Nombre
+              <p-sortIcon field="name" />
+          </th>
+          <th pSortableColumn="price" style="min-width: 8rem">
+              Precio
+              <p-sortIcon field="price" />
+          </th>
+          <th pSortableColumn="serie" style="min-width: 8rem">
+              Serie
+              <p-sortIcon field="serie" />
+          </th>
+          <th pSortableColumn="category" style="min-width:10rem">
+              Categoría
+              <p-sortIcon field="category" />
+          </th>
+          <th pSortableColumn="stock" style="min-width:7rem">
+              Stock
+              <p-sortIcon field="stock" />
+          </th>
+          <th pSortableColumn="warehouse" style="min-width:8rem">
+              Almacen
+            <p-sortIcon field="warehouse"/>
+        </th>
+          <th pSortableColumn="inventoryStatus" style="min-width: 8rem">
+              Status
+              <p-sortIcon field="inventoryStatus" />
+          </th>
+          <th>Description</th>
+          <th style="min-width: 12rem"></th>
+      </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-product>
+      <tr>
+          <td style="width: 3rem">
+              <p-tableCheckbox [value]="product" />
+          </td>
+          <td >{{ product.codigo}}</td>
+          <td style="min-width: 10rem">{{ product.name }}</td>
+          <td>{{ product.price | currency: 'S/. ' }}</td>
+          <td>{{ product.serie }}</td>
+          <td>{{ product.categoryName}}</td>
+          <td>{{ product.stock }}</td>
+          <td>{{ product.warehouseId }}</td>
+          <td>
+              <p-tag [value]="product.status" [severity]="getSeverity(product.inventoryStatus)" />
+            </td>
+          <td style="min-width: 16rem">{{ product.description }}</td>
+          <td>
+              <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
+              <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+          </td>
+      </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="5" class="text-center"> No se encontraron productos.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-toast></p-toast>
+<p-dialog [(visible)]="productDialog" [style]="{ width: '450px' }" header="Detalles del Producto" [modal]="true">
+  <ng-template pTemplate="content">
+      <div class="flex flex-col gap-6">
+          <div>
+              <label for="codigo" class="block font-bold mb-3">Codigo</label>
+              <input type="text" pInputText id="codigo" [(ngModel)]="product.codigo" required autofocus fluid/>
+              <small class="text-red-500" *ngIf="submitted && !product.codigo">El codigo es requerido.</small>
+          </div>
+          <div>
+              <label for="name" class="block font-bold mb-3">Nombre</label>
+              <input type="text" pInputText id="name" [(ngModel)]="product.name" required autofocus fluid />
+              <small class="text-red-500" *ngIf="submitted && !product.name">Nombre es requerido.</small>
+          </div>
+          <div>
+              <label for="serie" class="block font-bold mb-3">Serie</label>
+              <input type="text" pInputText id="serie" [(ngModel)]="product.serie" required autofocus fluid />
+              <small class="text-red-500" *ngIf="submitted && !product.serie">La serie es requerida.</small>
+          </div>
+          <div>
+              <label for="stock" class="block font-bold mb-3">Categoria</label>
+              <p-select [(ngModel)]="product.category" inputId="category" [options]="categories" optionLabel="label" optionValue="value" placeholder="Selecciona una categoria" fluid/>
+              <small class="text-red-500" *ngIf="submitted && !product.category">La categoria es requerida.</small>
+          </div>
+          <div>
+              <label for="warehouse" class="block font-bold mb-3">Almacen</label>
+              <p-select [(ngModel)]="product.warehouse" inputId="warehouse" [options]="warehouses" optionLabel="label" optionValue="value" placeholder="Selecciona un almacen" fluid />
+              <small class="text-red-500" *ngIf="submitted && !product.warehouse">El almacen es requerido.</small>
+          </div>
+          <div>
+            <label for="inventoryStatus" class="block font-bold mb-3">Estado</label>
+            <p-select [(ngModel)]="product.inventoryStatus" inputId="inventoryStatus" [options]="statuses" optionLabel="label" optionValue="value" placeholder="Selecciona un estado" fluid />
+            <small class="text-red-500" *ngIf="submitted && !product.inventoryStatus">El estado es requerido.</small>
+        </div>
+          <div>
+              <label for="description" class="block font-bold mb-3">Descripción</label>
+              <textarea id="description" pTextarea [(ngModel)]="product.description" required rows="3" cols="20" fluid></textarea>
+              <small class="text-red-500" *ngIf="submitted && !product.description">La descripción es requerida.</small>
+          </div>
+          <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-6">
+                  <label for="price" class="block font-bold mb-3">Precio</label>
+                  <p-inputNumber id="price" [(ngModel)]="product.price" mode="currency" currency="PEN" locale="en-US" fluid />
+              </div>
+              <div class="col-span-6">
+                  <label for="quantity" class="block font-bold mb-3">Stock</label>
+                  <p-inputnumber id="quantity" [(ngModel)]="product.stock" fluid />
+              </div>
+          </div>
+      </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+      <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+      <p-button label="Guardar" icon="pi pi-check" (click)="saveProduct()" />
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }" />
