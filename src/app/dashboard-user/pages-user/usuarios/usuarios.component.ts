@@ -18,7 +18,6 @@ import { InputIconModule } from 'primeng/inputicon';
 import { TextareaModule } from 'primeng/textarea';
 import { PasswordModule } from 'primeng/password';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { TagModule } from 'primeng/tag';
 
 interface User {
   id?: number;
@@ -49,8 +48,7 @@ interface User {
     CardModule,
     TextareaModule,
     PasswordModule,
-    SelectButtonModule,
-    TagModule
+    SelectButtonModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './usuarios.component.html'
@@ -75,29 +73,10 @@ export class UsuariosComponent implements OnInit {
     { label: 'Usuario', value: 'user' }
   ];
 
-  getStatusLabel(status: boolean | string): string {
-    // Convierte a booleano si es un string
-    const boolStatus = typeof status === 'string' 
-      ? status.toLowerCase() === 'true' 
-      : status;
-    
-    return boolStatus ? 'Activo' : 'Inactivo';
-  }
-  
-  getStatusSeverity(status: boolean | string): "success" | "danger" {
-    // Convierte a booleano si es un string
-    const boolStatus = typeof status === 'string' 
-      ? status.toLowerCase() === 'true' 
-      : status;
-    
-    return boolStatus ? "success" : "danger";
-  }
-
   statusOptions = [
-    { label: 'Activo', value: true },
-    { label: 'Inactivo', value: false }
+    { label: 'Activo', value: 'true' },
+    { label: 'Inactivo', value: 'false' }
   ];
-
 
   constructor(
     private userService: UserService,
@@ -122,8 +101,7 @@ export class UsuariosComponent implements OnInit {
   loadUsers(): void {
     this.userService.getAllUsers().subscribe({
       next: (data: User[]) => {
-        console.log("Usuarios recibidos del backend:", data);
-        console.log("Usuarios inactivos:", data.filter(user => user.status === false));
+        console.log("🚀 ~ UsuariosComponent ~ this.userService.getAllUsers ~ data:", data)
         this.users = data;
       },
       error: (error) => {
@@ -163,11 +141,10 @@ export class UsuariosComponent implements OnInit {
   }
 
   saveUser(): void {
-    
     this.submitted = true;
 
-    console.log('Usuario antes de guardar:', this.user.status);
-
+    console.log('Usuario antes de guardar:', this.user);
+    console.log('Número de contacto:', this.user.contactNumber);
 
     if (!this.user.name || !this.user.email || (!this.editMode && !this.user.password)) {
       this.messageService.add({

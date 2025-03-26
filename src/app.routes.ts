@@ -8,6 +8,8 @@ import { Access } from './app/authentication/access';
 import { Error } from './app/authentication/error';
 import { DashboardAdmiComponent} from './app/dashboard-admin/dashboard-admin.component';
 import { DashboardAdmin } from './app/dashboard-admin/pages-admin/dashboard/dashboard-admin';
+import { DashboardUser } from './app/dashboard-user/pages-user/dashboard/dashboard-user';
+
 
 
 export const routes: Routes = [
@@ -31,10 +33,15 @@ export const routes: Routes = [
     ]
   },
 
-  { path: 'user/dashboard', 
+  { path: '', 
     component: DashboardUserComponent,
     canActivate: [AuthGuard],
-    data: { roles: ['USER']}
+    data: { roles: ['USER']},
+    children: [
+      { path: 'user/dashboard', component: DashboardUser },
+      { path: 'pages', loadChildren: () => import('./app/dashboard-user/pages-user/pages.routes')},
+      // { path: 'ventas', loadChildren: () => import('./app/dashboard-user/ventas-user/ventas.routes')}
+    ]
   },
  
   { path: '**', component: Error}

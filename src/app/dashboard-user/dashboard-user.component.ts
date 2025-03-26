@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { AppLayout } from "../dashboard-user/layout-user/component/app.layout";
 
 @Component({
   selector: 'app-dashboard-user',
-  imports: [],
-  templateUrl: './dashboard-user.component.html',
-  styles: ``
+  standalone: true,
+  imports: [AppLayout],
+  templateUrl: './dashboard-user.component.html'
 })
 export class DashboardUserComponent {
 

@@ -1,0 +1,105 @@
+<p-toast></p-toast>
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button label="Nueva Categoría" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined 
+                (onClick)="deleteSelectedCategories()" [disabled]="!selectedCategories || !selectedCategories.length" />
+    </ng-template>
+
+    <ng-template pTemplate="end">
+        <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [value]="filteredCategorias"
+    [rows]="10"
+    [columns]="cols"
+    [paginator]="true"
+    [globalFilterFields]="['name', 'description']"
+    [tableStyle]="{ 'min-width': '60rem' }"
+    [(selection)]="selectedCategories"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} categorías"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+>
+    <ng-template pTemplate="caption">
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Gestión de Categorías</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    
+    <ng-template pTemplate="header">
+        <tr>
+            <th style="width: 3rem">
+                <p-tableHeaderCheckbox />
+            </th>
+                <th pSortableColumn="name" style="min-width:16rem">
+                    Nombre
+                    <p-sortIcon field="name" />
+                </th>
+            <th pSortableColumn="description" style="min-width:20rem">
+                Descripción
+                <p-sortIcon field="description" />
+            </th>
+            <th style="min-width: 12rem">Acciones</th>
+        </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="body" let-category>
+        <tr>
+            <td style="width: 3rem">
+                    <p-tableCheckbox [value]="category" />
+                </td>
+                <td style="min-width: 16rem">{{ category.name }}</td>
+            <td style="min-width: 20rem">{{ category.description }}</td>
+            <td>
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (onClick)="editCategoria(category)" />
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (onClick)="deleteCategoria(category)" />
+            </td>
+        </tr>
+    </ng-template>
+    
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="4">No se encontraron categorías.</td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="categoriaDialog" [style]="{ width: '450px' }" header="Detalles de Categoría" [modal]="true" class="p-fluid">
+    <ng-template pTemplate="content">
+        <form [formGroup]="categoriaForm">
+            <div class="flex flex-col gap-6">
+                <div class="field">
+                    <label for="name" class="block font-bold mb-3">Nombre</label>
+                    <input type="text" pInputText id="name" formControlName="name" required autofocus fluid/>
+                    <small class="text-red-500" *ngIf="submitted && categoriaForm.controls['name'].errors?.['required']">
+                        El nombre es requerido
+                    </small>
+                </div>
+                <div class="field">
+                    <label for="description" class="block font-bold mb-3">Descripción</label>
+                    <textarea id="description" pTextarea formControlName="description" required rows="3" cols="20" fluid></textarea>
+                    <small class="text-red-500" *ngIf="submitted && categoriaForm.controls['description'].errors?.['required']">
+                        La descripción es requerida
+                    </small>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" text (onClick)="hideDialog()" />
+        <p-button label="Guardar" icon="pi pi-check" (onClick)="saveCategoria()" />
+    </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>

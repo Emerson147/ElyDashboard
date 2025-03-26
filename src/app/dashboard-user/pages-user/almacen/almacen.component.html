@@ -1,0 +1,111 @@
+<p-toolbar styleClass="mb-6">
+  <ng-template pTemplate="start">
+      <p-button label="Nuevo Almacén" icon="pi pi-plus" severity="secondary" class="mr-2" (click)="openNew()" />
+      <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined (click)="deleteSelectedWarehouses()" [disabled]="!selectedWarehouses || !selectedWarehouses.length" />
+  </ng-template>
+
+  <ng-template pTemplate="end">
+      <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (click)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+<p-table 
+  #dt
+  [value]="filteredWarehouses" 
+  [rows]="10" 
+  [columns]="cols"
+  [paginator]="true" 
+  [globalFilterFields]="['name','location','description']"
+  [tableStyle]="{'min-width': '50rem'}"
+  [(selection)]="selectedWarehouses"
+  [rowHover]="true"
+  dataKey="id"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} almacenes"
+  [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]"
+>
+  
+  <ng-template pTemplate="caption">
+      <div class="flex items-center justify-between">
+          <h5 class="m-0">Gestión de Almacenes</h5>
+          <p-iconfield>
+              <p-inputicon styleClass="pi pi-search" />
+              <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Buscar..." />
+          </p-iconfield>
+      </div>
+  </ng-template>
+  
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="name" style="min-width:8rem">
+        Nombre
+        <p-sortIcon field="name" />
+      </th>
+      <th pSortableColumn="location" style="min-width:8rem">
+        Ubicación
+        <p-sortIcon field="location" />
+      </th>
+      <th pSortableColumn="description" style="min-width:8rem">
+        Descripción
+        <p-sortIcon field="description" />
+      </th>
+      <th style="min-width: 12rem"></th>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="body" let-warehouse>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="warehouse" />
+      </td>
+      <td>{{warehouse.name}}</td>
+      <td>{{warehouse.location}}</td>
+      <td>{{warehouse.description}}</td>
+      <td>  
+          <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editWarehouse(warehouse)"></p-button>
+          <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteWarehouse(warehouse)"></p-button>
+      </td>
+    </tr>
+  </ng-template>
+  
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="5" class="text-center">No se encontraron almacenes.</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog [(visible)]="warehouseDialog" [style]="{width: '450px'}" header="Detalles de Almacén" [modal]="true">
+  <ng-template pTemplate="content">
+    <div class="flex flex-col gap-6">
+      <div>
+        <label for="name" class="block font-bold mb-3">Nombre</label>
+        <input type="text" pInputText id="name" [(ngModel)]="warehouse.name" required autofocus fluid/>
+        <small class="text-red-500" *ngIf="submitted && !warehouse.name">El nombre es obligatorio.</small>
+      </div>
+      
+      <div>
+        <label for="location" class="block font-bold mb-3">Ubicación</label>
+        <input type="text" pInputText id="location" [(ngModel)]="warehouse.location" required fluid/>
+        <small class="text-red-500" *ngIf="submitted && !warehouse.location">La ubicación es obligatoria.</small>
+      </div>
+      
+      <div>
+        <label for="description" class="block font-bold mb-3">Descripción</label>
+        <textarea id="description" pTextarea [(ngModel)]="warehouse.description" rows="3" fluid></textarea>
+        <small class="text-red-500" *ngIf="submitted && !warehouse.description">La descripción es obligatoria.</small>
+      </div>
+    </div>
+  </ng-template>
+  
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" (click)="saveWarehouse()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '450px'}" />
