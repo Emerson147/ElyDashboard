@@ -1,1 +1,166 @@
-<p>ventas works!</p>
+<!-- <p-toolbar styleClass="mb-6">
+  <ng-template pTemplate="start">
+      <p-button label="Nueva Orden" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNewOrder()" />
+      <p-button severity="secondary" label="Eliminar" icon="pi pi-trash" outlined (onClick)="deleteSelectedOrders()" [disabled]="!selectedOrders || !selectedOrders.length" />
+  </ng-template>
+
+  <ng-template pTemplate="end">
+      <p-button label="Exportar" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+  </ng-template>
+</p-toolbar>
+
+<p-card>
+  <b><span>Gestión de Órdenes</span></b>
+  <button
+    pButton
+    label="Enviar y Facturar"
+    icon="pi pi-print"
+    severity="primary"
+    class="float-right"
+    [disabled]="validateSubmit()"
+    (onClick)="submitAction()"
+  ></button>
+</p-card>
+<hr />
+
+<p-card>
+  <b><span>Detalles del Cliente</span></b>
+  <form [formGroup]="manageOrderForm">
+    <div class="flex flex-wrap gap-4">
+      <div class="flex-auto">
+        <label for="name">Nombre</label>
+        <input type="text" pInputText id="name" formControlName="name" required />
+        <small class="text-red-500" *ngIf="manageOrderForm.controls.name.touched && manageOrderForm.controls.name.invalid">
+          Este campo es obligatorio.
+        </small>
+      </div>
+
+      <div class="flex-auto">
+        <label for="email">Correo Electrónico</label>
+        <input type="email" pInputText id="email" formControlName="email" required />
+        <small class="text-red-500" *ngIf="manageOrderForm.controls.email.touched && manageOrderForm.controls.email.invalid">
+          Este campo es obligatorio.
+        </small>
+      </div>
+
+      <div class="flex-auto">
+        <label for="contactNumber">Número de Contacto</label>
+        <input type="text" pInputText id="contactNumber" formControlName="contactNumber" required />
+        <small class="text-red-500" *ngIf="manageOrderForm.controls.contactNumber.touched && manageOrderForm.controls.contactNumber.invalid">
+          Este campo es obligatorio.
+        </small>
+      </div>
+
+      <div class="flex-auto">
+        <label for="paymentMethod">Método de Pago</label>
+        <p-dropdown
+          inputId="paymentMethod"
+          formControlName="paymentMethod"
+          [options]="paymentMethods"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona un método"
+          required
+        ></p-dropdown>
+        <small class="text-red-500" *ngIf="manageOrderForm.controls.paymentMethod.touched && manageOrderForm.controls.paymentMethod.invalid">
+          Este campo es obligatorio.
+        </small>
+      </div>
+    </div>
+  </form>
+</p-card>
+<hr />
+
+<p-card>
+  <b><span>Seleccionar Producto</span></b>
+  <form [formGroup]="manageOrderForm">
+    <div class="flex flex-wrap gap-4">
+      <div class="flex-auto">
+        <label for="category">Categoría</label>
+        <p-dropdown
+          inputId="category"
+          formControlName="category"
+          [options]="categories"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Selecciona una categoría"
+          (onChange)="getProductsByCategory($event.value)"
+        ></p-dropdown>
+      </div>
+
+      <div class="flex-auto">
+        <label for="product">Producto</label>
+        <p-dropdown
+          inputId="product"
+          formControlName="product"
+          [options]="products"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Selecciona un producto"
+          (onChange)="getProductDetails($event.value)"
+        ></p-dropdown>
+      </div>
+
+      <div class="flex-auto">
+        <label for="price">Precio</label>
+        <input type="number" pInputText id="price" formControlName="price" required readonly />
+      </div>
+
+      <div class="flex-auto">
+        <label for="quantity">Cantidad</label>
+        <input type="number" pInputText id="quantity" formControlName="quantity" required (input)="setQuantity($event)" />
+      </div>
+
+      <div class="flex-auto">
+        <label for="total">Total</label>
+        <input type="number" pInputText id="total" formControlName="total" required readonly />
+      </div>
+    </div>
+  </form>
+  <div class="flex justify-between mt-4">
+    <p-button label="Agregar" icon="pi pi-plus" (onClick)="add()" [disabled]="validateProductAdd()"></p-button>
+    <p-button label="Total: {{ totalAmount | currency: 'S/. ' }}" icon="pi pi-money-bill" severity="success"></p-button>
+  </div>
+</p-card>
+<hr />
+
+<p-table
+  [value]="dataSource"
+  [columns]="displayedColumns"
+  [paginator]="true"
+  [rows]="10"
+  [tableStyle]="{ 'min-width': '50rem' }"
+  currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+  [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Nombre</th>
+      <th>Categoría</th>
+      <th>Precio</th>
+      <th>Cantidad</th>
+      <th>Total</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-item>
+    <tr>
+      <td>{{ item.name }}</td>
+      <td>{{ item.category }}</td>
+      <td>{{ item.price | currency: 'S/. ' }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>{{ item.total | currency: 'S/. ' }}</td>
+      <td>
+        <p-button icon="pi pi-trash" severity="danger" (onClick)="handleDeleteAction(item)" rounded text></p-button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="6" class="text-center">No se encontraron productos en la orden.</td>
+    </tr>
+  </ng-template>
+</p-table> -->

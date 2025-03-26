@@ -26,21 +26,21 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] },
     children: [
       { path: 'admin/dashboard', component: DashboardAdmin },
-      { path: 'pages', loadChildren: () => import('./app/dashboard-admin/pages-admin/pages.routes')}
-      
+      { path: 'pages', loadChildren: () => import('./app/dashboard-admin/pages-admin/pages.routes')},
+      { path: 'ventas', loadChildren: () => import('./app/dashboard-admin/ventas-admin/ventas.routes')}
     ]
   },
 
-  { path: 'user/dashboard', component: DashboardUserComponent,
+  { path: 'user/dashboard', 
+    component: DashboardUserComponent,
     canActivate: [AuthGuard],
     data: { roles: ['USER']}
-
   },
  
   { path: '**', component: Error}
 
  
-];
+]
 
 
 // export const routes: Routes = [

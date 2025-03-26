@@ -34,9 +34,10 @@ export class AppMenu {
             {
                 label: 'Ventas',
                 items: [
-                    { label: 'Clientes', icon: 'pi pi-fw pi-user', routerLink: ['/pages/clientes'] },
-                    { label: 'Ventas', icon: 'pi pi-fw pi-shopping-bag', routerLink: ['/pages/ventas'] },
-                    { label: 'Busqueda', icon: 'pi pi-fw pi-search', routerLink: ['/pages/busqueda'] }
+                    { label: 'Clientes', icon: 'pi pi-fw pi-user', routerLink: ['/ventas/clientes'] },
+                    { label: 'Reportes', icon: 'pi pi-fw pi-file', routerLink: ['/ventas/reportes'] },
+                    { label: 'Ventas', icon: 'pi pi-fw pi-shopping-bag', routerLink: ['/ventas/ventas'] },
+                    { label: 'Busqueda', icon: 'pi pi-fw pi-search', routerLink: ['/ventas/busqueda'] }
                 ]
             },
             {
