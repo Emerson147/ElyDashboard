@@ -23,11 +23,20 @@ export class AppMenu {
             {
                 label: 'Home',
                 items: [
+                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/pages/dashboard'] },
                     { label: 'Usuarios', icon: 'pi pi-user ', routerLink: ['/pages/usuarios'] },
                     { label: 'Categoria', icon: 'pi pi-fw pi-tags', routerLink: ['/pages/categoria'] },
                     { label: 'Producto', icon: 'pi pi-fw pi-shopping-bag', routerLink: ['/pages/producto'] },
                     { label: 'Factura', icon: 'pi pi-fw pi-file', routerLink: ['/pages/factura'] },
                     { label: 'Almacén', icon: 'pi pi-fw pi-warehouse', routerLink: ['/pages/almacen'] },
+                ]
+            },
+            {
+                label: 'Ventas',
+                items: [
+                    { label: 'Clientes', icon: 'pi pi-fw pi-user', routerLink: ['/pages/clientes'] },
+                    { label: 'Ventas', icon: 'pi pi-fw pi-shopping-bag', routerLink: ['/pages/ventas'] },
+                    { label: 'Busqueda', icon: 'pi pi-fw pi-search', routerLink: ['/pages/busqueda'] }
                 ]
             },
             {
