@@ -185,7 +185,8 @@ export class UsuariosComponent implements OnInit {
       role: this.user.role,
       status: this.user.status
     };
-
+    
+    
     if (this.user.password) {
       userToSend.password = this.user.password;
     }

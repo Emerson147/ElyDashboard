@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { environment } from "../../../../environments/enviroment";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { catchError, map, Observable, throwError, tap } from "rxjs";
 
 
 @Injectable({
@@ -32,17 +32,28 @@ export class ProductsService {
       'Content-Type': 'application/json'
     });
   }
-
   getAllProducts(): Observable<any> {
     const headers = this.getAuthHeaders();
-    return this.http.get(`${this.apiUrl}/product/get`, { headers });
+    return this.http.get(`${this.apiUrl}/product/get`, { headers }).pipe(
+      map(response => {
+        console.log('✅ Productos recibidos:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('❌ Error al obtener productos:', error);
+        // Puedes personalizar el mensaje de error
+        return throwError(() => new Error('No se pudieron cargar los productos'));
+      })
+    );
   }
+
 
   getProductById(id: number): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.get(`${this.apiUrl}/product/get/${id}`, { headers });
   }
 
+  // products.service.ts
   createProduct(product: any): Observable<any> {
     const headers = this.getAuthHeaders();
     return this.http.post(`${this.apiUrl}/product/add`, product, { headers });
@@ -50,7 +61,6 @@ export class ProductsService {
 
   updateProduct(product: any): Observable<any> {
     const headers = this.getAuthHeaders();
-    // Usando POST en lugar de PUT para evitar problemas de CORS
     return this.http.post(`${this.apiUrl}/product/update/${product.id}`, product, { headers });
   }
 

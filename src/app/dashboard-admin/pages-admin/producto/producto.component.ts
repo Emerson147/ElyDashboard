@@ -1,351 +1,382 @@
-import { Component, OnInit } from '@angular/core';
-import { ButtonModule } from 'primeng/button';
-import { ToolbarModule } from 'primeng/toolbar';
-import { TableModule } from 'primeng/table';
-import { DialogModule } from 'primeng/dialog';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { ToastModule } from 'primeng/toast';
-import { FileUploadModule } from 'primeng/fileupload';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
-import { TextareaModule } from 'primeng/textarea';
-import { TagModule } from 'primeng/tag';
-import { RatingModule } from 'primeng/rating';
-import { ProductsService } from '../service/products.service';
-import { CategoryService } from '../service/category.service';
-import { WarehouseService } from '../service/warehouse.service';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { firstValueFrom } from 'rxjs';
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Table, TableModule } from "primeng/table";
+import { ButtonModule } from "primeng/button";
+import { DialogModule } from "primeng/dialog";
+import { ToastModule } from "primeng/toast";
+import { ConfirmDialogModule } from "primeng/confirmdialog";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { InputTextModule } from "primeng/inputtext";
+import { CardModule } from "primeng/card";
+import { MessageService } from "primeng/api";
+import { ConfirmationService } from "primeng/api";
+import { ProductsService } from "../service/products.service";
+import { CategoryService } from "../service/category.service";
+import { WarehouseService } from "../service/warehouse.service";
+import { ToolbarModule } from "primeng/toolbar";
+import { firstValueFrom } from "rxjs";
+import { IconFieldModule } from "primeng/iconfield";
+import { InputIconModule } from "primeng/inputicon";
+import { TextareaModule } from "primeng/textarea";
+import { SelectButtonModule } from "primeng/selectbutton";
+import { TagModule } from "primeng/tag";
+import { SelectModule } from "primeng/select";
+import { InputNumberModule } from "primeng/inputnumber";
+import { catchError, throwError } from "rxjs";
 
+interface Product {
+  id?: number;
+  codigo?: string;
+  name: string;
+  description: string;
+  price: number;
+  status: string;
+  serie?: string;
+  stock: number;
+  categoryId?: number;
+  warehouseId?: number;
+}
 
 @Component({
-  selector: 'app-producto',
+  selector: "app-productos",
   standalone: true,
   imports: [
-    ToolbarModule, 
-    ButtonModule, 
-    TableModule, 
-    DialogModule, 
-    ConfirmDialogModule, 
-    InputTextModule,
     CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    SelectModule,
-    RadioButtonModule,
-    InputNumberModule,
-    ToastModule,
-    FileUploadModule,
     IconFieldModule,
     InputIconModule,
+    ToolbarModule,
+    TableModule,
+    ButtonModule,
+    DialogModule,
+    ToastModule,
+    ConfirmDialogModule,
+    ReactiveFormsModule,
+    FormsModule,
+    InputTextModule,
+    CardModule,
     TextareaModule,
+    SelectButtonModule,
     TagModule,
-    RatingModule,
+    InputNumberModule,
+    SelectModule,
   ],
   providers: [MessageService, ConfirmationService],
-  templateUrl: './producto.component.html',
+  templateUrl: "./producto.component.html",
 })
 export class ProductoComponent implements OnInit {
-  products: any[] = [];
-  product: any = {};
-  productForm!: FormGroup;
-  submitted: boolean = false;
-  productDialog: boolean = false;
-  editMode: boolean = false;
-  filterValue: string = '';
-  selectedProducts: any[] = [];
-  cols: any[] = [];
-  statuses: any[] = [
-    { label: 'In Stock', value: 'true' },
-    { label: 'Out of Stock', value: 'false' }
+  products: Product[] = [];
+  product: Product = this.getEmptyProduct();
+  submitted = false;
+  productDialog = false;
+  editMode = false;
+  selectedProducts: Product[] = []; // Renamed from filteredProducts for clarity
+
+  cols = [
+    { field: "codigo", header: "Código" },
+    { field: "name", header: "Nombre" },
+    { field: "description", header: "Descripción" },
+    { field: "price", header: "Precio" },
+    { field: "stock", header: "Stock" },
+    { field: "status", header: "Estado" },
   ];
+
+  statusOptions = [
+    { label: "Stock", value: true },
+    { label: "No Stock", value: false },
+  ];
+
   categories: any[] = [];
   warehouses: any[] = [];
 
+  getStatusLabel(status: boolean | string): string {
+    const boolStatus =
+      typeof status === "string" ? status.toLowerCase() === "true" : status;
+    return boolStatus ? "Stock" : "No Stock";
+  }
+
+  getStatusSeverity(status: boolean | string): "success" | "danger" {
+    const boolStatus =
+      typeof status === "string" ? status.toLowerCase() === "true" : status;
+    return boolStatus ? "success" : "danger";
+  }
 
   constructor(
     private productsService: ProductsService,
     private categoryService: CategoryService,
     private warehouseService: WarehouseService,
-    private formBuilder: FormBuilder,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) { }
+    private confirmationService: ConfirmationService,
+  ) {}
 
-  ngOnInit(): void {
-    this.initForm();
+  private getEmptyProduct(): Product {
+    return {
+      name: '',
+      description: '',
+      price: 0,
+      stock: 0,
+      status: 'true', // Cambiar a booleano
+      codigo: '',
+      serie: '',
+      categoryId: undefined,
+      warehouseId: undefined
+    };
+  }
+  
+  ngOnInit() {
     this.loadProducts();
     this.loadCategories();
     this.loadWarehouses();
   }
 
-  private initForm(): void {
-    this.productForm = this.formBuilder.group({
-      name: ['', Validators.required],
-      description: ['', Validators.required],
-      price: ['', Validators.required],
-      stock: ['', Validators.required],
-      warehouse: ['', Validators.required],
-      category: ['', Validators.required],
-      image: ['', Validators.required],
-      discount: ['', Validators.required],
-      rating: ['', Validators.required]
-    });
-  }
-
   loadProducts() {
     this.productsService.getAllProducts().subscribe({
-      next: (data) => {
+      next: (data: Product[]) => {
         this.products = data;
       },
       error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudieron cargar los productos'
-        });
-        console.error('Error al cargar productos:', error);
-      }
+        this.showError("No se pudieron cargar los productos", error);
+      },
     });
   }
 
-  loadCategories() {
+  loadCategories(): void {
     this.categoryService.getAllCategory().subscribe({
-      next: (data) => {
-        // Transformar las categorías al formato que espera el dropdown
-        this.categories = data.map((category: any) => ({
+      next: (data: any[]) => {
+        this.categories = data.map((category) => ({
           label: category.name,
-          value: category.id
+          value: {
+            id: category.id,
+            name: category.name
+          }
         }));
       },
       error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudieron cargar las categorías'
-        });
-        console.error('Error al cargar categorías:', error);
-      }
+        this.showError("No se pudieron cargar las categorías", error);
+      },
     });
   }
-
-  loadWarehouses() {
+  
+  loadWarehouses(): void {
     this.warehouseService.getAllWarehouse().subscribe({
-      next: (data) => {
-        // Transformar los almacenes al formato que espera el dropdown
-        this.warehouses = data.map((warehouse: any) => ({
+      next: (data: any[]) => {
+        this.warehouses = data.map((warehouse) => ({
           label: warehouse.name,
-          value: warehouse.id
+          value: {
+            id: warehouse.id,
+            name: warehouse.name
+          }
         }));
       },
       error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudieron cargar los almacenes'
-        });
-        console.error('Error al cargar almacenes:', error);
-      }
+        this.showError("No se pudieron cargar los almacenes", error);
+      },
     });
   }
 
-  openNew() {
-    this.product = {};
-    this.productForm.reset();
+  openNew(): void {
+    this.product = this.getEmptyProduct();
     this.submitted = false;
-    this.productDialog = true;
     this.editMode = false;
+    this.productDialog = true;
   }
 
-  hideDialog() {
+  hideDialog(): void {
     this.productDialog = false;
     this.submitted = false;
-    this.productForm.reset();
   }
 
-  get filteredProducts() {
-    if (!this.filterValue) {
-      return this.products;
+  editProduct(product: Product): void {
+    this.product = {
+      ...product,
+      categoryId: product.categoryId,
+      warehouseId: product.warehouseId
+    };
+    this.editMode = true;
+    this.productDialog = true;
+  }
+
+  saveProduct(): void {
+    this.submitted = true;
+
+    const errors: string[] = [];
+
+    if (!this.product.codigo?.trim()) errors.push('Código');
+    if (!this.product.name?.trim()) errors.push('Nombre');
+    if (!this.product.serie?.trim()) errors.push('Serie');
+    if (!this.product.categoryId) errors.push('Categoría');
+    if (!this.product.warehouseId) errors.push('Almacén');
+    if (!this.product.description?.trim()) errors.push('Descripción');
+    if (this.product.price <= 0) errors.push('Precio');
+    if (this.product.stock <= 0) errors.push('Stock');
+    if (!this.product.status) errors.push('Estado');
+
+    if (errors.length > 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Campos requeridos',
+        detail: `Por favor complete los siguientes campos: ${errors.join(', ')}`
+      });
+      return;
     }
-    
-    const filter = this.filterValue.toLowerCase();
-    
-    return this.products.filter(product => {
-      const nameMatch = product.name?.toLowerCase().includes(filter) || false;
-      const descriptionMatch = product.description?.toLowerCase().includes(filter) || false;
-      return nameMatch || descriptionMatch;
+
+    const requestData = {
+      name: this.product.name,
+      codigo: this.product.codigo,
+      description: this.product.description,
+      serie: this.product.serie,
+      price: this.product.price,
+      stock: this.product.stock,
+      status: this.product.status,
+      categoryId: typeof this.product.categoryId === 'object' 
+        ? (this.product.categoryId as any).id 
+        : this.product.categoryId,
+      warehouseId: typeof this.product.warehouseId === 'object' 
+        ? (this.product.warehouseId as any).id 
+        : this.product.warehouseId
+    };
+
+    if (this.editMode) {
+      this.updateExistingProduct(requestData);
+    } else {
+      this.createNewProduct(requestData);
+    }
+  }
+
+  private updateExistingProduct(productToSend: Partial<Product>): void {
+    if (!this.product.id) return;
+
+    this.productsService.updateProduct(productToSend as Product).subscribe({
+      next: (data: Product) => {
+        const index = this.findIndexById(this.product.id!);
+        if (index !== -1) {
+          this.products[index] = data;
+        }
+        this.showSuccess("Producto actualizado");
+        this.productDialog = false;
+        this.loadProducts();
+      },
+      error: (error) => {
+        this.showError("Error al actualizar producto", error);
+      },
     });
   }
 
+  private createNewProduct(productToSend: Partial<Product>): void {
+    this.productsService.createProduct(productToSend).subscribe({
+        next: (data: Product) => {
+          this.products.push(data);
+          this.showSuccess('Producto creado');
+          this.productDialog = false;
+          this.loadProducts();
+        },
+        error: (error) => {
+          this.showError('Error al crear usuario', error)
+        }
+      });
+  }
 
-  deleteSelectedProducts() {
+  deleteProduct(product: Product): void {
     this.confirmationService.confirm({
-      message: '¿Está seguro que desea eliminar los productos seleccionados?',
-      header: 'Confirmar',
-      icon: 'pi pi-exclamation-triangle',
+      message: "¿Está seguro que desea eliminar este producto?",
+      header: "Confirmar",
+      icon: "pi pi-exclamation-triangle",
+      accept: () => {
+        if (!product.id) return;
+        this.productsService.deleteProduct(product.id).subscribe({
+          next: () => {
+            this.products = this.products.filter(
+              (val) => val.id !== product.id,
+            );
+            this.showSuccess("Producto eliminado");
+          },
+          error: (error) => {
+            this.showError("Error al eliminar producto", error);
+          },
+        });
+      },
+    });
+  }
+
+  deleteSelectedProducts(): void {
+    this.confirmationService.confirm({
+      message: "¿Está seguro que desea eliminar los productos seleccionados?",
+      header: "Confirmar",
+      icon: "pi pi-exclamation-triangle",
       accept: async () => {
         try {
-          const deletionPromises = this.selectedProducts.map(product => 
-            firstValueFrom(this.productsService.deleteProduct(product.id))
-          );
-          
+          const deletionPromises = this.selectedProducts
+            .filter((product) => product.id)
+            .map((product) =>
+              firstValueFrom(this.productsService.deleteProduct(product.id!)),
+            );
+
           await Promise.all(deletionPromises);
-          
+
           this.products = this.products.filter(
-            val => !this.selectedProducts.some(sc => sc.id === val.id)
+            (val) => !this.selectedProducts.some((sc) => sc.id === val.id),
           );
-          this.showSuccess('Productos eliminados');
+          this.showSuccess("Productos eliminados");
           this.selectedProducts = [];
         } catch (error) {
-          this.showError('Error al eliminar algunos productos', error);
+          this.showError("Error al eliminar productos", error);
         }
-      }
-    });
-  }
-
-  onGlobalFilter(table: any, event: Event) {
-    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-  }
-
-  exportCSV() {
-    import('xlsx').then(xlsx => {
-      const worksheet = xlsx.utils.json_to_sheet(this.products);
-      const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
-      const excelBuffer: any = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-      this.saveAsExcelFile(excelBuffer, 'productos');
-    });
-  }
-
-  saveAsExcelFile(buffer: any, fileName: string): void {
-    import('file-saver').then(module => {
-      const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-      const EXCEL_EXTENSION = '.xlsx';
-      const data: Blob = new Blob([buffer], { type: EXCEL_TYPE });
-      module.saveAs(data, fileName + '_export_' + new Date().getTime() + EXCEL_EXTENSION);
+      },
     });
   }
 
   private showSuccess(detail: string): void {
     this.messageService.add({
-      severity: 'success',
-      summary: 'Éxito',
-      detail,      
-      life: 3000
+      severity: "success",
+      summary: "Éxito",
+      detail,
+      life: 3000,
     });
   }
 
   private showError(detail: string, error?: any): void {
-    if (error) {
-      console.error(detail, error);
-    }
+    console.error(detail, error);
     this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: error?.error?.message ? `${detail}: ${error.error.message}` : detail
+      severity: "error",
+      summary: "Error",
+      detail: error?.error?.message
+        ? `${detail}: ${error.error.message}`
+        : detail,
     });
   }
 
-  editProduct(product: any) {
-    this.product = { ...product };
-    this.productDialog = true;
-    this.editMode = true;
+  onGlobalFilter(table: Table, event: Event): void {
+    table.filterGlobal((event.target as HTMLInputElement).value, "contains");
   }
 
-  deleteProduct(product: any) {
-    this.confirmationService.confirm({
-      message: `¿Está seguro que desea eliminar el producto ${product.name}?`,
-      header: 'Confirmar',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.productsService.deleteProduct(product.id).subscribe({
-          next: () => {
-            this.products = this.products.filter(val => val.id !== product.id);
-            this.showSuccess(`Producto ${product.name} eliminado`);
-          },
-          error: (error) => {
-            this.showError('Error al eliminar el producto', error);
-          }
-        });
-      }
-    });
-  }
-
-  saveProduct() {
-    this.submitted = true;
-
-    // Validar campos requeridos
-    if (!this.product.name || !this.product.description || !this.product.price || 
-        !this.product.stock || !this.product.category || !this.product.warehouse) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Advertencia',
-        detail: 'Por favor complete todos los campos requeridos'
+  async exportCSV(): Promise<void> {
+    try {
+      const xlsx = await import("xlsx");
+      const worksheet = xlsx.utils.json_to_sheet(this.products);
+      const workbook = { Sheets: { data: worksheet }, SheetNames: ["data"] };
+      const excelBuffer: any = xlsx.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
       });
-      return;
-    }
-
-    // Preparar el objeto producto para enviarlo al backend
-    const productToSend = {
-      name: this.product.name,
-      description: this.product.description,
-      price: typeof this.product.price === 'object' ? this.product.price.value : this.product.price,
-      stock: typeof this.product.stock === 'object' ? this.product.stock.value : this.product.stock,
-      serie: this.product.serie || '',
-      codigo: this.product.codigo || '',
-      categoryId: this.product.category, // Enviamos el ID de la categoría
-      warehouseId: this.product.warehouse, // Enviamos el ID del almacén
-      status: this.product.inventoryStatus === 'true' // Convertimos a booleano
-    };
-
-    console.log('Enviando producto al backend:', productToSend);
-
-    if (this.editMode) {
-      // Añadir el ID si estamos en modo edición
-      const productToUpdate = {
-        ...productToSend,
-        id: this.product.id
-      };
-
-      this.productsService.updateProduct(productToUpdate).subscribe({
-        next: (response) => {
-          this.loadProducts(); // Recargar la lista completa
-          this.productDialog = false;
-          this.showSuccess(`Producto ${this.product.name} actualizado correctamente`);
-          this.product = {};
-        },
-        error: (error) => {
-          this.showError('Error al actualizar el producto', error);
-        }
-      });
-    } else {
-      this.productsService.createProduct(productToSend).subscribe({
-        next: (response) => {
-          this.loadProducts(); // Recargar la lista completa
-          this.productDialog = false;
-          this.showSuccess(`Producto ${this.product.name} creado correctamente`);
-          this.product = {};
-        },
-        error: (error) => {
-          this.showError('Error al crear el producto', error);
-        }
-      });
+      this.saveAsExcelFile(excelBuffer, "productos");
+    } catch (error) {
+      this.showError("Error al exportar productos", error);
     }
   }
 
-  getSeverity(status: string) {
-    switch (status) {
-      case 'true':
-        return 'success';
-      case 'false':
-        return 'danger';
-      default:
-        return 'info';
-    }
+  private async saveAsExcelFile(buffer: any, fileName: string): Promise<void> {
+    const EXCEL_TYPE =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const EXCEL_EXTENSION = ".xlsx";
+    const data: Blob = new Blob([buffer], { type: EXCEL_TYPE });
+    const fileSaver = await import("file-saver");
+    fileSaver.saveAs(
+      data,
+      fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION,
+    );
   }
+
+  private findIndexById(id: number): number {
+    return this.products.findIndex((product) => product.id === id);
+  }
+
 }
